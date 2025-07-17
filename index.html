@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeamFlow X - Team Relationship Analysis</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <i class="fas fa-project-diagram"></i>
+      <span>TeamFlow X</span>
+    </div>
+    <div class="nav-actions">
+      <button id="export-btn" class="nav-btn">
+        <i class="fas fa-download"></i>
+        Export
+      </button>
+      <button id="fullscreen-btn" class="nav-btn">
+        <i class="fas fa-expand"></i>
+        Fullscreen
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-container">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3><i class="fas fa-users"></i> Team Overview</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="total-members">0</div>
+            <div class="stat-label">Team Members</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="total-connections">0</div>
+            <div class="stat-label">Connections</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="departments-count">0</div>
+            <div class="stat-label">Departments</div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="sidebar-section">
+        <h3><i class="fas fa-filter"></i> Filters</h3>
+        <div class="filter-group">
+          <label>Search:</label>
+          <input type="text" id="search-input" class="search-input" placeholder="Search team members...">
+        </div>
+        <div class="filter-group">
+          <label>Department:</label>
+          <select id="department-filter" class="filter-select">
+            <option value="all">All Departments</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Relationship Type:</label>
+          <select id="relationship-filter" class="filter-select">
+            <option value="all">All Relationships</option>
+            <option value="manages">Management</option>
+            <option value="collaborates">Collaboration</option>
+            <option value="mentored_by">Mentorship</option>
+            <option value="coordinates">Coordination</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3><i class="fas fa-cogs"></i> Layout Controls</h3>
+        <div class="control-group">
+          <select id="layout-selector" class="control-select">
+            <option value="cose">Force-Directed</option>
+            <option value="circle">Circular</option>
+            <option value="grid">Grid</option>
+            <option value="breadthfirst">Hierarchical</option>
+            <option value="concentric">Concentric</option>
+          </select>
+          <button id="reset-layout" class="control-btn">
+            <i class="fas fa-sync-alt"></i> Apply Layout
+          </button>
+          <button id="fit-graph" class="control-btn secondary">
+            <i class="fas fa-compress-arrows-alt"></i> Fit to View
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content-area">
+      <div class="graph-header">
+        <h1>Team Relationship Analysis</h1>
+        <p>Interactive visualization of team connections and collaboration patterns</p>
+      </div>
+      <div id="cy" class="graph-container" style="position: relative;">
+        <div class="graph-legends-overlay" style="position: absolute; top: 16px; left: 16px; z-index: 10; background: rgba(255,255,255,0.95); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 1rem; display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start; max-width: 90%;">
+          <div class="legend-group">
+            <h4 style="margin-bottom: 0.5rem; font-size: 1rem; color: var(--text-secondary);"><i class="fas fa-info-circle"></i> Department Legend</h4>
+            <div class="legend legend-grid">
+              <div class="legend-item">
+                <div class="legend-color" style="background: #2563eb;"></div>
+                <span>Engineering</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #dc2626;"></div>
+                <span>Design</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #f59e0b;"></div>
+                <span>Product</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #7c3aed;"></div>
+                <span>Marketing</span>
+              </div>
+            </div>
+          </div>
+          <div class="legend-group">
+            <h4 style="margin-bottom: 0.5rem; font-size: 1rem; color: var(--text-secondary);"><i class="fas fa-info-circle"></i> Relationship Legend</h4>
+            <div class="legend legend-grid">
+              <div class="legend-item">
+                <svg width="32" height="8" style="vertical-align:middle"><line x1="2" y1="4" x2="30" y2="4" stroke="#dc2626" stroke-width="4" /></svg>
+                <span>Management</span>
+              </div>
+              <div class="legend-item">
+                <svg width="32" height="8" style="vertical-align:middle"><line x1="2" y1="4" x2="30" y2="4" stroke="#2563eb" stroke-width="2" /></svg>
+                <span>Collaboration</span>
+              </div>
+              <div class="legend-item">
+                <svg width="32" height="8" style="vertical-align:middle"><line x1="2" y1="4" x2="30" y2="4" stroke="#f59e0b" stroke-width="3" stroke-dasharray="4,2" /></svg>
+                <span>Mentorship</span>
+              </div>
+              <div class="legend-item">
+                <svg width="32" height="8" style="vertical-align:middle"><line x1="2" y1="4" x2="30" y2="4" stroke="#7c3aed" stroke-width="2" stroke-dasharray="2,2" /></svg>
+                <span>Coordination</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="info-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-user-circle"></i> Selected Member</h3>
+        <button id="close-panel" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="member-details" class="panel-content">
+        <div class="empty-state">
+          <i class="fas fa-mouse-pointer"></i>
+          <p>Click on a team member to view their profile and connections</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading team data...</p>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
