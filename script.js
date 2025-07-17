@@ -43,12 +43,104 @@ class TeamConnectionMap {
     }
   }
 
-  loadData = async () => {
-    const res = await fetch('data.json');
-    if (!res.ok) throw new Error(res.status);
-    this.data = await res.json();
-    this.filteredData = JSON.parse(JSON.stringify(this.data));
+  // API Configuration
+  apiConfig = {
+    baseUrl: 'https://jsonplaceholder.typicode.com', 
+    endpoints: {
+      teamData: '/users',
+    },
+    headers: {
+      'Content-Type': 'application/json',
+    }
   };
+
+  loadData = async () => {
+    try {
+      this.showLoading && this.showLoading('Fetching team data...');
+      const response = await fetch(`${this.apiConfig.baseUrl}${this.apiConfig.endpoints.teamData}`, {
+        method: 'GET',
+        headers: this.apiConfig.headers
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const apiData = await response.json();
+      this.data = this.transformApiData(apiData);
+      this.filteredData = JSON.parse(JSON.stringify(this.data));
+    } catch (error) {
+      console.error('Failed to load data from API:', error);
+      console.log('Falling back to local data...');
+      await this.loadLocalData();
+    }
+  };
+
+  async loadLocalData() {
+    try {
+      const response = await fetch('data.json');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      this.data = await response.json();
+      this.filteredData = JSON.parse(JSON.stringify(this.data));
+    } catch (error) {
+      throw new Error('Failed to load both API and local data: ' + error.message);
+    }
+  }
+
+  transformApiData(apiData) {
+    const nodes = apiData.map(user => ({
+      data: {
+        id: user.id.toString(),
+        label: user.name,
+        department: this.getDepartmentFromUser(user),
+        role: this.getRoleFromUser(user),
+        email: user.email,
+        skills: this.getSkillsFromUser(user),
+        experience: this.getExperienceFromUser(user)
+      }
+    }));
+    const edges = this.generateSampleEdges(nodes);
+    return { nodes, edges };
+  }
+
+  getDepartmentFromUser(user) {
+    const departments = ['Engineering', 'Design', 'Product', 'Marketing'];
+    return departments[user.id % departments.length];
+  }
+
+  getRoleFromUser(user) {
+    const roles = ['Manager', 'Senior Developer', 'Developer', 'Designer', 'Product Manager'];
+    return roles[user.id % roles.length];
+  }
+
+  getSkillsFromUser(user) {
+    const skillSets = [
+      ['Leadership', 'JavaScript', 'React'],
+      ['Design', 'Figma', 'UI/UX'],
+      ['Product Strategy', 'Analytics', 'User Research'],
+      ['Marketing', 'SEO', 'Content Strategy']
+    ];
+    return skillSets[user.id % skillSets.length];
+  }
+
+  getExperienceFromUser(user) {
+    const experience = (user.id % 10) + 1;
+    return `${experience} years`;
+  }
+
+  generateSampleEdges(nodes) {
+    const edges = [];
+    const relationshipTypes = ['manages', 'collaborates', 'mentored_by', 'coordinates'];
+    for (let i = 0; i < nodes.length - 1; i++) {
+      const relationshipType = relationshipTypes[i % relationshipTypes.length];
+      edges.push({
+        data: {
+          id: `${nodes[i].data.id}_${nodes[i + 1].data.id}`,
+          source: nodes[i].data.id,
+          target: nodes[i + 1].data.id,
+          relationship: relationshipType,
+          label: this.config.relationships[relationshipType].label
+        }
+      });
+    }
+    return edges;
+  }
 
   initializeGraph() {
     this.cy = cytoscape({
@@ -123,8 +215,35 @@ class TeamConnectionMap {
       relFilter = document.getElementById('relationship-filter').value,
       searchTerm = document.getElementById('search-input').value.toLowerCase();
     this.filteredData = JSON.parse(JSON.stringify(this.data));
-    if (deptFilter !== 'all')
-      this.filteredData.nodes = this.filteredData.nodes.filter(n => n.data.department === deptFilter);
+
+    if (deptFilter !== 'all') {
+      const deptNodes = this.filteredData.nodes.filter(n => n.data.department === deptFilter);
+      const deptNodeIds = new Set(deptNodes.map(n => n.data.id));
+
+      if (relFilter === 'all') {
+        this.filteredData.edges = this.filteredData.edges.filter(e =>
+          deptNodeIds.has(e.data.source) || deptNodeIds.has(e.data.target)
+        );
+        const connectedNodeIds = new Set();
+        this.filteredData.edges.forEach(e => {
+          connectedNodeIds.add(e.data.source);
+          connectedNodeIds.add(e.data.target);
+        });
+        this.filteredData.nodes = this.filteredData.nodes.filter(n => connectedNodeIds.has(n.data.id));
+      } else {
+        this.filteredData.edges = this.filteredData.edges.filter(e =>
+          (deptNodeIds.has(e.data.source) || deptNodeIds.has(e.data.target)) &&
+          e.data.relationship === relFilter
+        );
+        const connectedNodeIds = new Set();
+        this.filteredData.edges.forEach(e => {
+          connectedNodeIds.add(e.data.source);
+          connectedNodeIds.add(e.data.target);
+        });
+        this.filteredData.nodes = this.filteredData.nodes.filter(n => connectedNodeIds.has(n.data.id));
+      }
+    }
+
     if (searchTerm) {
       const matchedNodes = this.filteredData.nodes.filter(n =>
         n.data.label.toLowerCase().includes(searchTerm) ||
@@ -140,12 +259,12 @@ class TeamConnectionMap {
       this.filteredData.nodes = this.filteredData.nodes.filter(n => connectedNodeIds.has(n.data.id));
       this.filteredData.edges = connectedEdges;
     }
+
     const nodeIds = new Set(this.filteredData.nodes.map(n => n.data.id));
     this.filteredData.edges = this.filteredData.edges.filter(e =>
       nodeIds.has(e.data.source) && nodeIds.has(e.data.target)
     );
-    if (relFilter !== 'all')
-      this.filteredData.edges = this.filteredData.edges.filter(e => e.data.relationship === relFilter);
+
     this.updateGraph();
     this.updateStats();
   }
@@ -277,7 +396,6 @@ class TeamConnectionMap {
     document.getElementById('member-details').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i><p>${message}</p></div>`;
   }
 
-  // Utility functions
   getInitials = name => name.split(' ').map(n => n[0]).join('').toUpperCase();
   capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
   debounce = (func, wait) => {
