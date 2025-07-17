@@ -1,0 +1,193 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "id": "sarah_chen",
+        "label": "Sarah Chen",
+        "department": "Engineering",
+        "role": "Engineering Manager",
+        "email": "sarah.chen@company.com",
+        "skills": ["Leadership", "Full-stack Development", "Architecture"],
+        "experience": "8 years"
+      }
+    },
+    {
+      "data": {
+        "id": "mike_rodriguez",
+        "label": "Mike Rodriguez",
+        "department": "Engineering",
+        "role": "Senior Frontend Developer",
+        "email": "mike.rodriguez@company.com",
+        "skills": ["React", "JavaScript", "UI/UX"],
+        "experience": "6 years"
+      }
+    },
+    {
+      "data": {
+        "id": "priya_patel",
+        "label": "Priya Patel",
+        "department": "Engineering",
+        "role": "Backend Developer",
+        "email": "priya.patel@company.com",
+        "skills": ["Python", "APIs", "Database Design"],
+        "experience": "4 years"
+      }
+    },
+    {
+      "data": {
+        "id": "alex_kim",
+        "label": "Alex Kim",
+        "department": "Design",
+        "role": "UX Designer",
+        "email": "alex.kim@company.com",
+        "skills": ["User Research", "Prototyping", "Design Systems"],
+        "experience": "5 years"
+      }
+    },
+    {
+      "data": {
+        "id": "jessica_wong",
+        "label": "Jessica Wong",
+        "department": "Product",
+        "role": "Product Manager",
+        "email": "jessica.wong@company.com",
+        "skills": ["Strategy", "Analytics", "Roadmapping"],
+        "experience": "7 years"
+      }
+    },
+    {
+      "data": {
+        "id": "david_smith",
+        "label": "David Smith",
+        "department": "Engineering",
+        "role": "DevOps Engineer",
+        "email": "david.smith@company.com",
+        "skills": ["AWS", "Kubernetes", "CI/CD"],
+        "experience": "5 years"
+      }
+    },
+    {
+      "data": {
+        "id": "maria_garcia",
+        "label": "Maria Garcia",
+        "department": "Marketing",
+        "role": "Marketing Manager",
+        "email": "maria.garcia@company.com",
+        "skills": ["Digital Marketing", "Content Strategy", "Analytics"],
+        "experience": "6 years"
+      }
+    },
+    {
+      "data": {
+        "id": "james_taylor",
+        "label": "James Taylor",
+        "department": "Engineering",
+        "role": "Junior Developer",
+        "email": "james.taylor@company.com",
+        "skills": ["JavaScript", "React", "Learning"],
+        "experience": "1 year"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "source": "sarah_chen",
+        "target": "mike_rodriguez",
+        "relationship": "manages",
+        "strength": "high",
+        "frequency": "daily"
+      }
+    },
+    {
+      "data": {
+        "source": "sarah_chen",
+        "target": "priya_patel",
+        "relationship": "manages",
+        "strength": "high",
+        "frequency": "daily"
+      }
+    },
+    {
+      "data": {
+        "source": "sarah_chen",
+        "target": "david_smith",
+        "relationship": "manages",
+        "strength": "high",
+        "frequency": "daily"
+      }
+    },
+    {
+      "data": {
+        "source": "sarah_chen",
+        "target": "james_taylor",
+        "relationship": "manages",
+        "strength": "high",
+        "frequency": "daily"
+      }
+    },
+    {
+      "data": {
+        "source": "mike_rodriguez",
+        "target": "alex_kim",
+        "relationship": "collaborates",
+        "strength": "high",
+        "frequency": "weekly"
+      }
+    },
+    {
+      "data": {
+        "source": "mike_rodriguez",
+        "target": "jessica_wong",
+        "relationship": "collaborates",
+        "strength": "medium",
+        "frequency": "weekly"
+      }
+    },
+    {
+      "data": {
+        "source": "priya_patel",
+        "target": "david_smith",
+        "relationship": "collaborates",
+        "strength": "high",
+        "frequency": "daily"
+      }
+    },
+    {
+      "data": {
+        "source": "alex_kim",
+        "target": "jessica_wong",
+        "relationship": "collaborates",
+        "strength": "high",
+        "frequency": "weekly"
+      }
+    },
+    {
+      "data": {
+        "source": "jessica_wong",
+        "target": "maria_garcia",
+        "relationship": "coordinates",
+        "strength": "medium",
+        "frequency": "weekly"
+      }
+    },
+    {
+      "data": {
+        "source": "james_taylor",
+        "target": "mike_rodriguez",
+        "relationship": "mentored_by",
+        "strength": "high",
+        "frequency": "weekly"
+      }
+    },
+    {
+      "data": {
+        "source": "james_taylor",
+        "target": "priya_patel",
+        "relationship": "collaborates",
+        "strength": "medium",
+        "frequency": "occasional"
+      }
+    }
+  ]
+}
